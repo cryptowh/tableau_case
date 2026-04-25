@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BI Pulse — Daily Summary Mock</title>
+<style>
+  :root {
+    --bg: #1a1d21;
+    --bg-elev: #232529;
+    --bg-card: #2c2f33;
+    --border: #3a3d42;
+    --text-1: #e8e9eb;
+    --text-2: #abadb1;
+    --text-3: #6f7378;
+    --accent: #4f8cd1;
+    --pos: #2eb886;
+    --neg: #e01e5a;
+    --warn: #ecb22e;
+    --link: #1d9bd1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Lato", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  .channel { max-width: 720px; margin: 0 auto; padding: 32px 24px; }
+  .channel-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .channel-header h1 { margin: 0; font-size: 16px; font-weight: 700; }
+  .channel-header .topic { margin-top: 4px; font-size: 12px; color: var(--text-2); }
+
+  .msg-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 6px;
+    background: linear-gradient(135deg, #4f8cd1, #2eb886);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #fff; flex-shrink: 0;
+  }
+  .msg-head .name { font-weight: 700; font-size: 15px; }
+  .msg-head .badge {
+    padding: 1px 5px; background: var(--text-3); color: var(--bg);
+    border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 4px;
+    vertical-align: middle;
+  }
+  .msg-head .ts { color: var(--text-2); font-size: 12px; margin-left: 8px; }
+
+  .card {
+    border-left: 4px solid var(--accent);
+    background: var(--bg-card);
+    border-radius: 0 6px 6px 0;
+    padding: 18px 20px;
+    margin-left: 46px;
+    margin-bottom: 12px;
+  }
+  .card .title {
+    font-weight: 700; font-size: 16px; color: var(--text-1);
+    margin-bottom: 14px;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .card .title .star { color: var(--warn); }
+
+  .ns {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    background: var(--bg-elev);
+    border-radius: 6px;
+  }
+  .ns .ns-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-2); margin-bottom: 4px;
+  }
+  .ns .ns-value { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .ns .ns-value .v { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .ns .ns-value .delta { color: var(--pos); font-size: 14px; font-weight: 600; }
+  .ns .ns-value .vs { color: var(--text-2); font-size: 12px; }
+
+  .section { margin-bottom: 14px; }
+  .section .head {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 6px; font-weight: 600;
+  }
+  .section .head.driver { color: var(--pos); }
+  .section .head.watch { color: var(--warn); }
+  .section .body { font-size: 14px; line-height: 1.55; color: var(--text-1); }
+  .section .body strong { color: var(--text-1); }
+
+  .lever-list {
+    margin-top: 8px; padding: 8px 12px;
+    background: var(--bg-elev); border-radius: 4px; font-size: 13px;
+  }
+  .lever-list .row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .lever-list .row .l { color: var(--text-2); }
+  .lever-list .row .r { font-weight: 600; }
+  .lever-list .row .r.pos { color: var(--pos); }
+  .lever-list .row .r.neg { color: var(--neg); }
+
+  .ctas {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .cta {
+    padding: 8px 14px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-1);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .cta:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .cta.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .cta.primary:hover { background: #4076b8; }
+
+  .provenance {
+    margin-left: 46px; margin-top: 0;
+    padding: 8px 0; font-size: 11px; color: var(--text-3);
+  }
+  .provenance code { color: var(--text-2); font-size: 11px; }
+  .provenance a { color: var(--link); text-decoration: none; }
+  .provenance a:hover { text-decoration: underline; }
+
+  .reactions {
+    margin-left: 46px; margin-top: 4px;
+    display: flex; gap: 6px;
+  }
+  .reaction {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px 9px;
+    font-size: 12px;
+    color: var(--text-2);
+  }
+  .reaction:hover { background: var(--bg-card); cursor: pointer; }
+
+  .disclaimer {
+    margin: 24px auto 0; max-width: 720px;
+    padding: 14px 18px;
+    background: var(--bg-elev);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    font-size: 12px; color: var(--text-2); line-height: 1.6;
+  }
+  .disclaimer strong { color: var(--text-1); }
+  .disclaimer a { color: var(--link); text-decoration: none; }
+  .disclaimer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="channel">
+
+  <div class="channel-header">
+    <h1># bi-pulse</h1>
+    <div class="topic">Daily auto-generated insights — Aldar Retail Executive · grounded on metric_catalog.md v1.0</div>
+  </div>
+
+  <div class="msg-head">
+    <div class="avatar">★</div>
+    <div>
+      <span class="name">BI Pulse</span><span class="badge">APP</span>
+      <span class="ts">9:00 AM</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">
+      <span class="star">★</span>
+      Daily Pulse — Friday 25 Apr 2026
+    </div>
+
+    <div class="ns">
+      <div class="ns-label">★ North Star · Sales / Active HH / Week</div>
+      <div class="ns-value">
+        <span class="v tabular">$35.82</span>
+        <span class="delta">▲ 29.3%</span>
+        <span class="vs">vs prev period</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="head driver">📈 Driver</div>
+      <div class="body">
+        Growth came from <strong>depth, not breadth</strong> — Baskets per HH and AOV more than offset a slight decline in Active HH.
+        <div class="lever-list tabular">
+          <div class="row"><span class="l">Baskets per HH</span><span class="r pos">▲ 21.9%</span></div>
+          <div class="row"><span class="l">AOV</span><span class="r pos">▲ 5.95%</span></div>
+          <div class="row"><span class="l">Active HH</span><span class="r neg">▼ 0.72%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="head watch">⚠ Watch</div>
+      <div class="body">
+        <strong>Acquisition is the missing lever.</strong> Reach is flat-to-down — depth alone won't sustain the trajectory if the active base shrinks further.
+      </div>
+    </div>
+
+    <div class="ctas">
+      <a class="cta primary" href="dashboard.html">📊 Open dashboard</a>
+      <a class="cta" href="dashboard.html" title="Jumps to Customer Flow panel in Section 3">🔍 Drill: customer flow</a>
+      <a class="cta" href="#" title="Mock: opens chat scoped to Active HH metric"
+         onclick="alert('Mock: opens scoped LLM chat. The agent has tool access to the certified data source (RLS-enforced) and can return: trend chart, segment breakdown, anomaly window, and an open-dashboard CTA for visual drill.'); return false;">
+        💬 Ask: why did Active HH decline?
+      </a>
+    </div>
+  </div>
+
+  <div class="provenance">
+    Generated 09:00 UTC by <code>bi-pulse-agent</code> · last metric refresh 03:00 UTC ·
+    grounded on <a href="../docs/metric_catalog.md">metric_catalog.md v1.0</a> ·
+    <a href="../docs/approach.md">how this works ↗</a>
+  </div>
+
+  <div class="reactions">
+    <div class="reaction">👀 3</div>
+    <div class="reaction">📊 2</div>
+    <div class="reaction">+ Add reaction</div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>About this mock.</strong> Static prototype illustrating Pillar 4 (AI Companion Layer) of the engineering approach. In production an LLM agent grounded on the certified metric catalog generates this card on its target cadence and posts it to the user's primary channel.
+    Cadence is per-persona: <strong>daily</strong> for ops, <strong>weekly</strong> for exec, <strong>on-anomaly</strong> for the rest. RLS extends to the LLM's tool calls. See <a href="../docs/approach.md">approach.md Pillar 4</a> for design rationale and trade-offs.
+  </div>
+
+</div>
+
+</body>
+</html>
