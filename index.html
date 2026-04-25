@@ -78,7 +78,7 @@
 
   /* KPI rows — 2 layers */
   .kpi-row-primary   { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-bottom: var(--gap); }
-  .kpi-row-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+  .kpi-row-secondary { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
   .kpi-primary   { padding: 22px 24px; }
   .kpi-primary   .value { font-size: 34px; }
   .kpi-secondary { padding: 14px 16px; }
@@ -238,8 +238,8 @@
         <span class="delta pos">▲ 28.4%<span class="vs">vs prev</span></span>
         <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
         <div class="callout-line tabular">
-          <span>Baskets <strong>151,467</strong></span>
-          <span class="delta-inline pos">▲ 21.2%</span>
+          <span>Daily run-rate <strong>$12,689</strong></span>
+          <span class="delta-inline pos">▲ 28.4%</span>
         </div>
       </div>
       <div class="kpi kpi-primary star">
@@ -256,10 +256,21 @@
 
     <!-- Layer 2: decomposition + supporting KPIs (smaller tiles) -->
     <div class="kpi-row-secondary">
+      <div class="kpi kpi-secondary" title="Quantity is mixed unit-of-measure (count + grams); use for in-category ranking only.">
+        <div class="label">Total Quantity</div>
+        <div class="value tabular">151.5M</div>
+        <span class="delta pos">▲ 38.7%<span class="vs">vs prev</span></span>
+        <span class="help-mini">mixed UoM · in-category only</span>
+      </div>
       <div class="kpi kpi-secondary">
-        <div class="label">Active HH</div>
-        <div class="value tabular">2,479</div>
-        <span class="delta neg">▼ 0.72%<span class="vs">vs prev</span></span>
+        <div class="label">Baskets</div>
+        <div class="value tabular">151,467</div>
+        <span class="delta pos">▲ 21.2%<span class="vs">vs prev</span></span>
+      </div>
+      <div class="kpi kpi-secondary">
+        <div class="label">Avg Basket Value</div>
+        <div class="value tabular">$29.90</div>
+        <span class="delta pos">▲ 5.95%<span class="vs">vs prev</span></span>
       </div>
       <div class="kpi kpi-secondary">
         <div class="label">Baskets per HH</div>
@@ -267,15 +278,9 @@
         <span class="delta pos">▲ 21.9%<span class="vs">vs prev</span></span>
       </div>
       <div class="kpi kpi-secondary">
-        <div class="label">Avg Basket Value</div>
-        <div class="value tabular">$29.90</div>
-        <span class="delta pos">▲ 5.95%<span class="vs">vs prev</span></span>
-      </div>
-      <div class="kpi kpi-secondary" title="Quantity is mixed unit-of-measure (count + grams); use for in-category ranking only.">
-        <div class="label">Total Quantity</div>
-        <div class="value tabular">151.5M</div>
-        <span class="delta pos">▲ 38.7%<span class="vs">vs prev</span></span>
-        <span class="help-mini">mixed UoM · in-category only</span>
+        <div class="label">Active HH</div>
+        <div class="value tabular">2,479</div>
+        <span class="delta neg">▼ 0.72%<span class="vs">vs prev</span></span>
       </div>
     </div>
   </section>
@@ -556,17 +561,19 @@ const hhComp = [
 
 // HH LTV decile — % of sales per decile (Pareto-like, plausible from EDA HH stats)
 // EDA: HH activity max $38K, mean $3.2K, std $3.3K → long tail.
+// Monotonically decreasing by construction; sums to 100; matches callout
+// (D1=28, D1+D2+0.5*D3≈52, D1..D5=78, D6..D10=22).
 const ltvDeciles = [
   { d: 'D1 (top)', pct: 28 },
-  { d: 'D2',       pct: 13 },
-  { d: 'D3',       pct: 11 },
-  { d: 'D4',       pct: 9.5 },
-  { d: 'D5',       pct: 8 },
+  { d: 'D2',       pct: 18 },
+  { d: 'D3',       pct: 12.5 },
+  { d: 'D4',       pct: 10 },
+  { d: 'D5',       pct: 9.5 },
   { d: 'D6',       pct: 7 },
-  { d: 'D7',       pct: 6 },
-  { d: 'D8',       pct: 5.5 },
-  { d: 'D9',       pct: 5 },
-  { d: 'D10',      pct: 7 }   // residual to total 100
+  { d: 'D7',       pct: 5.5 },
+  { d: 'D8',       pct: 4 },
+  { d: 'D9',       pct: 3 },
+  { d: 'D10',      pct: 2.5 }
 ];
 
 // Basket size distribution (anchored on EDA quartiles)
