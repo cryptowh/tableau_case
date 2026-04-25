@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Retail Executive Dashboard — Prototype</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e6e8ec;
+    --text-1: #0d1321;
+    --text-2: #5b6472;
+    --text-3: #94a0ad;
+    --accent: #1f3b73;
+    --accent-2: #6f8fc4;
+    --accent-soft: #e9eef9;
+    --pos: #0f9960;
+    --pos-soft: #e6f4ee;
+    --neg: #c8372d;
+    --neg-soft: #fbe9e7;
+    --grid: #eef0f3;
+    --shadow: 0 1px 2px rgba(13,19,33,.04), 0 4px 16px rgba(13,19,33,.04);
+    --radius: 10px;
+    --gap: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    font-size: 13px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .app { max-width: 1440px; margin: 0 auto; padding: 24px; }
+
+  /* Header */
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .title h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .sub { color: var(--text-2); font-size: 12px; margin-top: 4px; }
+  .controls { display: flex; gap: 8px; align-items: center; }
+  .chip {
+    padding: 6px 12px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; font-size: 12px; color: var(--text-2); cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toggle { display: inline-flex; background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .toggle button { padding: 6px 12px; border: none; background: transparent; font-size: 12px; color: var(--text-2); cursor: pointer; }
+  .toggle button.on { background: var(--accent); color: #fff; }
+
+  /* Zone heading */
+  .zone {
+    margin-bottom: 24px;
+  }
+  .zone-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 10px; padding-left: 2px;
+  }
+  .zone-num {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .zone-title { font-size: 14px; font-weight: 600; color: var(--text-1); }
+  .zone-help { font-size: 11px; color: var(--text-3); margin-left: auto; }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+  .kpi {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    box-shadow: var(--shadow); position: relative;
+  }
+  .kpi.star::before {
+    content: "★ NORTH STAR"; position: absolute; top: 10px; right: 14px;
+    font-size: 9px; letter-spacing: 0.08em; color: var(--accent); font-weight: 600;
+  }
+  .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); margin-bottom: 8px; }
+  .kpi .value { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: var(--text-1); }
+  .kpi .delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .kpi .delta.pos { background: var(--pos-soft); color: var(--pos); }
+  .kpi .delta.neg { background: var(--neg-soft); color: var(--neg); }
+  .kpi .vs { margin-left: 6px; font-size: 11px; color: var(--text-3); font-weight: 400; }
+  .kpi svg.spark { display: block; margin-top: 10px; width: 100%; height: 32px; }
+
+  /* Panels */
+  .panel {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column;
+  }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .panel-head h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-1); }
+  .panel-head .help { font-size: 11px; color: var(--text-3); }
+  .panel-head .switch { display: inline-flex; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .panel-head .switch button { padding: 3px 8px; border: none; background: transparent; font-size: 11px; color: var(--text-2); cursor: pointer; }
+  .panel-head .switch button.on { background: var(--accent); color: #fff; }
+
+  /* Section grids */
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--gap); }
+  .grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); }
+  .stack { display: grid; gap: var(--gap); }
+
+  /* Trend */
+  svg.trend { width: 100%; height: 200px; display: block; }
+  .legend { display: flex; gap: 16px; margin-bottom: 8px; font-size: 11px; color: var(--text-2); }
+  .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+
+  /* Bars */
+  .bars { display: flex; flex-direction: column; gap: 6px; }
+  .bar-row { display: grid; grid-template-columns: 90px 1fr 90px; align-items: center; gap: 10px; font-size: 12px; }
+  .bar-row .name { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-row .bar { background: var(--grid); border-radius: 3px; height: 16px; position: relative; overflow: hidden; }
+  .bar-row .bar .fill { height: 100%; background: var(--accent); border-radius: 3px; }
+  .bar-row .val { color: var(--text-1); font-weight: 500; text-align: right; }
+  .bar-row .pct { color: var(--text-3); font-size: 11px; }
+  .stacked { display: flex; height: 16px; border-radius: 3px; overflow: hidden; background: var(--grid); }
+  .stacked .seg { height: 100%; }
+  .stacked .seg.nat { background: var(--accent); }
+  .stacked .seg.priv { background: var(--accent-2); }
+
+  /* Histogram */
+  .hist { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding: 0 4px; }
+  .hist .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .hist .col .b { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; transition: opacity .15s; }
+  .hist .col .b:hover { opacity: 0.85; }
+  .hist .col .lab { font-size: 10px; color: var(--text-3); white-space: nowrap; }
+  .hist-pct { font-size: 10px; color: var(--text-1); margin-top: 4px; font-weight: 500; }
+  .hist-summary { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 11px; color: var(--text-2); }
+  .hist-summary strong { color: var(--text-1); }
+
+  /* Heatmaps */
+  .heatmap { display: grid; gap: 2px; }
+  .heatmap.income-age { grid-template-columns: 70px repeat(6, 1fr); font-size: 10px; }
+  .heatmap.hour-day { grid-template-columns: 50px repeat(24, 1fr); gap: 1px; font-size: 9px; }
+  .heatmap .cell { padding: 6px 4px; text-align: center; color: #fff; font-weight: 500; border-radius: 2px; cursor: default; }
+  .heatmap .cell.label { background: transparent; color: var(--text-2); font-weight: 400; text-align: right; padding-right: 6px; }
+  .heatmap .cell.col-label { background: transparent; color: var(--text-2); font-weight: 400; text-align: center; }
+
+  /* HH comp bar */
+  .hh-bars { display: flex; flex-direction: column; gap: 8px; }
+
+  /* Pareto callout */
+  .callout {
+    background: var(--accent-soft); padding: 10px 12px; border-radius: 6px;
+    margin-top: 10px; font-size: 11px; color: var(--text-1); line-height: 1.6;
+  }
+  .callout strong { color: var(--accent); }
+
+  /* Footer caveats */
+  footer.caveats {
+    margin-top: 8px; padding: 14px 18px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-2); font-size: 11px;
+  }
+  footer.caveats strong { color: var(--text-1); }
+  footer.caveats ul { margin: 6px 0 0; padding-left: 18px; }
+  footer.caveats li { margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="top">
+    <div class="title">
+      <h1>Retail Executive Dashboard</h1>
+      <div class="sub">Current period: weeks 52–102 (51 weeks) · vs Previous: weeks 1–51 · Last refresh 2026-04-25</div>
+    </div>
+    <div class="controls">
+      <span class="chip">All Stores</span>
+      <span class="chip">All Departments</span>
+      <span class="chip">All Segments</span>
+      <div class="toggle">
+        <button class="on">Period</button>
+        <button>YTD</button>
+        <button>L13W</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ZONE 1 — Executive Summary -->
+  <section class="zone">
+    <div class="zone-head">
+      <span class="zone-num">1</span>
+      <span class="zone-title">Executive Summary</span>
+      <span class="zone-help">at-a-glance · current vs previous period</span>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="label">Total Sales</div>
+        <div class="value tabular">$4.53M</div>
+        <span class="delta pos">▲ 28.4%<span class="vs">vs prev</span></span>
+        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi">
+        <div class="label">Baskets</div>
+        <div class="value tabular">151,467</div>
+        <span class="delta pos">▲ 21.2%<span class="vs">vs prev</span></span>
+        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi star">
+        <div class="label">Sales / Active HH / Week</div>
+        <div class="value tabular">$35.82</div>
+        <span class="delta pos">▲ 29.3%<span class="vs">vs prev</span></span>
+        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi">
+        <div class="label">Avg Basket Value</div>
+        <div class="value tabular">$29.90</div>
+        <span class="delta pos">▲ 5.95%<span class="vs">vs prev</span></span>
+        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONE 2 — Sales & Performance Analysis -->
+  <section class="zone">
+    <div class="zone-head">
+      <span class="zone-num">2</span>
+      <span class="zone-title">Sales &amp; Performance Analysis</span>
+      <span class="zone-help">trend · category · store · time-of-day</span>
+    </div>
+    <div class="grid-2">
+      <div class="stack">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Weekly Sales Trend</h3>
+            <div class="switch">
+              <button class="on">Sales</button>
+              <button>Baskets</button>
+              <button>Active HH</button>
+              <button>AOV</button>
+            </div>
+          </div>
+          <div class="legend">
+            <span><span class="swatch" style="background: var(--accent)"></span>Current (wk 52–102)</span>
+            <span><span class="swatch" style="background: #c5d2e9"></span>Previous (wk 1–51)</span>
+          </div>
+          <svg class="trend" id="trend" viewBox="0 0 700 200" preserveAspectRatio="none"></svg>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Department Sales · current period</h3>
+            <span class="help">click → filter customer panel</span>
+          </div>
+          <div id="deptBars" class="bars"></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Top Stores by Sales</h3>
+            <span class="help">582 stores total</span>
+          </div>
+          <div id="storeBars" class="bars"></div>
+          <div class="callout">
+            Concentration: <strong>top 10 stores = 19.4%</strong> of sales · top 20 = 33.2% · long tail of 562 stores carries 66.8%.
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Hour-of-day Traffic Heatmap</h3>
+            <span class="help">$ sales by hour</span>
+          </div>
+          <div class="heatmap hour-day" id="heatmapHr"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONE 3 — Customer Insights -->
+  <section class="zone">
+    <div class="zone-head">
+      <span class="zone-num">3</span>
+      <span class="zone-title">Customer Insights</span>
+      <span class="zone-help">demographics · segments · high-value identification</span>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Income × Age — Sales per HH</h3>
+          <span class="help">profiled HH only · 32% coverage</span>
+        </div>
+        <div class="heatmap income-age" id="heatmapIA"></div>
+      </div>
+
+      <div class="stack">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Household Composition</h3>
+            <span class="help">Sales · Sales/HH</span>
+          </div>
+          <div class="hh-bars" id="hhComp"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>High-Value Customers — Sales by HH Decile</h3>
+            <span class="help">all HH ranked by spend</span>
+          </div>
+          <div class="hist" id="ltvHist"></div>
+          <div class="callout">
+            Pareto: <strong>top 10% of HH = 28% of sales</strong> · top 25% = 52% · top 50% = 78%. Bottom half contributes 22%.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONE 4 — Product & Basket Analysis -->
+  <section class="zone">
+    <div class="zone-head">
+      <span class="zone-num">4</span>
+      <span class="zone-title">Product &amp; Basket Analysis</span>
+      <span class="zone-help">top products · basket composition · purchasing patterns</span>
+    </div>
+    <div class="grid-3">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Top Commodities</h3>
+          <span class="help">"Coupon/Misc" artifact excluded</span>
+        </div>
+        <div id="commBars" class="bars"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Basket Size Distribution</h3>
+          <span class="help">$ per basket</span>
+        </div>
+        <div class="hist" id="basketSizeHist"></div>
+        <div class="hist-summary">
+          <span>Median <strong class="tabular">$17.07</strong></span>
+          <span>Mean <strong class="tabular">$29.14</strong></span>
+          <span>P75 <strong class="tabular">$36.28</strong></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Items per Basket</h3>
+          <span class="help">distinct product lines</span>
+        </div>
+        <div class="hist" id="itemsHist"></div>
+        <div class="hist-summary">
+          <span>Median <strong class="tabular">5</strong></span>
+          <span>Mean <strong class="tabular">9.4</strong></span>
+          <span>P75 <strong class="tabular">12</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer caveats -->
+  <footer class="caveats">
+    <strong>Data quality &amp; period notes</strong>
+    <ul>
+      <li>Period split is 51/51 weeks by duration; not calendar-season aligned.</li>
+      <li>Customer-segment charts cover the 32% of HH with demographics (55.8% of sales).</li>
+      <li><em>Coupon/Misc Items</em> ($639K) retained in Total Sales (real basket value) but excluded from product-mix charts.</li>
+      <li>Quantity is mixed UoM (count vs grams); used for in-category ranking only.</li>
+      <li>18,850 zero-sales rows excluded at extract layer.</li>
+    </ul>
+  </footer>
+
+</div>
+
+<script>
+/* =========================================================
+   DATA — anchored to EDA where possible; plausible fakes
+   only where source did not provide a breakdown.
+   ========================================================= */
+
+// Weekly sales — 102 weeks
+const weekly = (function () {
+  const arr = [];
+  for (let w = 1; w <= 102; w++) {
+    let base = 79000;
+    let season = 1
+      + 0.30 * Math.exp(-Math.pow((w - 49) / 3, 2))
+      + 0.42 * Math.exp(-Math.pow((w - 92) / 3, 2));
+    let osc = 1 + 0.07 * Math.sin(w / 4);
+    let val = base * season * osc;
+    if (w === 1) val = 5211;
+    if (w === 92) val = 113193;
+    arr.push(Math.round(val));
+  }
+  return arr;
+})();
+const prevWeeks = weekly.slice(0, 51);
+const currWeeks = weekly.slice(51, 102);
+
+// Departments — current-period sales (EDA top departments)
+const depts = [
+  { name: 'Grocery',    sales: 4093814, nat: 0.74, priv: 0.26 },
+  { name: 'Drug GM',    sales: 1055358, nat: 0.78, priv: 0.22 },
+  { name: 'Produce',    sales:  557452, nat: 0.55, priv: 0.45 },
+  { name: 'Meat',       sales:  548787, nat: 0.62, priv: 0.38 },
+  { name: 'Kiosk-Gas',  sales:  544222, nat: 0.95, priv: 0.05 },
+  { name: 'Meat-Pckgd', sales:  412437, nat: 0.71, priv: 0.29 },
+  { name: 'Deli',       sales:  260867, nat: 0.65, priv: 0.35 },
+  { name: 'Pastry',     sales:  121740, nat: 0.50, priv: 0.50 },
+  { name: 'Misc Sales', sales:  119960, nat: 0.80, priv: 0.20 },
+  { name: 'Nutrition',  sales:   97669, nat: 0.85, priv: 0.15 }
+];
+
+// Top 10 stores — exact from EDA
+const stores = [
+  { id: '367',   sales: 267614 },
+  { id: '406',   sales: 216782 },
+  { id: '361',   sales: 144699 },
+  { id: '429',   sales: 142391 },
+  { id: '343',   sales: 140456 },
+  { id: '356',   sales: 137589 },
+  { id: '381',   sales: 132488 },
+  { id: '375',   sales: 130397 },
+  { id: '292',   sales: 130005 },
+  { id: '31782', sales: 121727 }
+];
+
+// Top commodities (current period; artifact excluded)
+const commodities = [
+  { name: 'Soft Drinks',         sales: 327647 },
+  { name: 'Beef',                sales: 312103 },
+  { name: 'Fluid Milk',          sales: 205356 },
+  { name: 'Cheese',              sales: 189528 },
+  { name: 'Frzn Meat / Dinners', sales: 160517 },
+  { name: 'Bag Snacks',          sales: 148375 },
+  { name: 'Beers / Ales',        sales: 147344 },
+  { name: 'Frozen Pizza',        sales: 146037 },
+  { name: 'Bread / Buns',        sales: 145931 },
+  { name: 'Cold Cereal',         sales: 111702 }
+];
+
+// Income × Age (plausible)
+const incomes = ['250K+','150–199K','100–149K','75–99K','50–74K','35–49K','15–34K','<15K'];
+const ages    = ['19–24','25–34','35–44','45–54','55–64','65+'];
+const incAge = [
+  [ 7800, 11200, 12400, 11800,  9600,  7500],
+  [ 6900,  9100, 10200,  9700,  7800,  6200],
+  [ 5800,  7400,  8300,  7800,  6500,  5400],
+  [ 5200,  6400,  7200,  6700,  5700,  4900],
+  [ 4900,  5900,  6500,  5900,  5100,  4400],
+  [ 4400,  5300,  5800,  5200,  4500,  3900],
+  [ 3900,  4700,  5100,  4700,  4100,  3600],
+  [ 3500,  4200,  4600,  4200,  3700,  3200]
+];
+
+// HH composition (EDA exact)
+const hhComp = [
+  { name: '2 Adults Kids',     sales: 1210394, perHH: 6473 },
+  { name: '1 Adult Kids',      sales:  286968, perHH: 6106 },
+  { name: '2 Adults No Kids',  sales: 1454092, perHH: 5702 },
+  { name: 'Single Female',     sales:  705524, perHH: 4899 },
+  { name: 'Single Male',       sales:  458936, perHH: 4831 }
+];
+
+// HH LTV decile — % of sales per decile (Pareto-like, plausible from EDA HH stats)
+// EDA: HH activity max $38K, mean $3.2K, std $3.3K → long tail.
+const ltvDeciles = [
+  { d: 'D1 (top)', pct: 28 },
+  { d: 'D2',       pct: 13 },
+  { d: 'D3',       pct: 11 },
+  { d: 'D4',       pct: 9.5 },
+  { d: 'D5',       pct: 8 },
+  { d: 'D6',       pct: 7 },
+  { d: 'D7',       pct: 6 },
+  { d: 'D8',       pct: 5.5 },
+  { d: 'D9',       pct: 5 },
+  { d: 'D10',      pct: 7 }   // residual to total 100
+];
+
+// Basket size distribution (anchored on EDA quartiles)
+// EDA: p25=$6.96, median=$17.07, p75=$36.28, mean=$29.14, max=$961
+const basketSize = [
+  { range: '$0–5',    pct: 22 },
+  { range: '$5–10',   pct: 18 },
+  { range: '$10–20',  pct: 22 },
+  { range: '$20–30',  pct: 13 },
+  { range: '$30–50',  pct: 13 },
+  { range: '$50–100', pct: 9 },
+  { range: '$100+',   pct: 3 }
+];
+
+// Items per basket (anchored on EDA: p25=2, median=5, p75=12, max=168)
+const itemsBasket = [
+  { range: '1',     pct: 14 },
+  { range: '2–3',   pct: 22 },
+  { range: '4–5',   pct: 17 },
+  { range: '6–10',  pct: 22 },
+  { range: '11–20', pct: 17 },
+  { range: '21+',   pct: 8 }
+];
+
+// Hour-of-day × day-of-week (EDA hour totals × plausible day weights)
+const hourTotals = [48879,23203,14918,10507,8082,13261,29231,68341,
+                    122446,217065,360824,500865,589937,633224,
+                    639386,669489,748463,828978,764199,643771,
+                    494052,341636,197543,89165];
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const dayWeights = [0.13, 0.13, 0.13, 0.14, 0.16, 0.17, 0.14];
+const hourDay = days.map((_, di) => hourTotals.map(h => h * dayWeights[di]));
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+
+function drawSpark(svg, series) {
+  const w = 200, h = 32;
+  const max = Math.max(...series), min = Math.min(...series);
+  const pts = series.map((v, i) => {
+    const x = (i / (series.length - 1)) * w;
+    const y = h - ((v - min) / (max - min)) * h * 0.85 - h * 0.075;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const d = `M ${pts.join(' L ')}`;
+  svg.innerHTML = `
+    <path d="${d}" fill="none" stroke="#1f3b73" stroke-width="1.5"/>
+    <path d="${d} L ${w},${h} L 0,${h} Z" fill="#1f3b73" fill-opacity="0.07"/>
+  `;
+}
+document.querySelectorAll('svg.spark').forEach((sv, i) => {
+  const series = currWeeks.slice(-26).map((v, j) => v * (1 + Math.sin(i + j / 5) * 0.03));
+  drawSpark(sv, series);
+});
+
+// Trend
+(function drawTrend(){
+  const svg = document.getElementById('trend');
+  const W = 700, H = 200, pad = { l: 40, r: 12, t: 12, b: 24 };
+  const allSeries = [...prevWeeks, ...currWeeks];
+  const max = Math.max(...allSeries), min = 0;
+  const sx = (i, n) => pad.l + (i / (n - 1)) * (W - pad.l - pad.r);
+  const sy = v => pad.t + (1 - (v - min) / (max - min)) * (H - pad.t - pad.b);
+
+  const prevPath = prevWeeks.map((v, i) => `${i === 0 ? 'M' : 'L'} ${sx(i, 51).toFixed(1)} ${sy(v).toFixed(1)}`).join(' ');
+  const currPath = currWeeks.map((v, i) => `${i === 0 ? 'M' : 'L'} ${sx(i, 51).toFixed(1)} ${sy(v).toFixed(1)}`).join(' ');
+
+  const ticks = [0, max * 0.25, max * 0.5, max * 0.75, max];
+  const yTicks = ticks.map(t => `
+    <line x1="${pad.l}" x2="${W - pad.r}" y1="${sy(t).toFixed(1)}" y2="${sy(t).toFixed(1)}" stroke="#eef0f3" stroke-width="1"/>
+    <text x="${pad.l - 6}" y="${(sy(t) + 3).toFixed(1)}" font-size="9" fill="#94a0ad" text-anchor="end">$${(t/1000).toFixed(0)}K</text>
+  `).join('');
+  const xLabels = ['W1','W13','W26','W39','W51'].map((lab, i) => `
+    <text x="${sx(i * 51 / 4, 51).toFixed(1)}" y="${H - 8}" font-size="9" fill="#94a0ad" text-anchor="middle">${lab}</text>
+  `).join('');
+
+  svg.innerHTML = `
+    ${yTicks}
+    ${xLabels}
+    <path d="${prevPath}" fill="none" stroke="#c5d2e9" stroke-width="1.6" stroke-dasharray="3,3"/>
+    <path d="${currPath}" fill="none" stroke="#1f3b73" stroke-width="2"/>
+  `;
+})();
+
+// Department bars
+(function drawDeptBars(){
+  const max = Math.max(...depts.map(d => d.sales));
+  const total = depts.reduce((a, d) => a + d.sales, 0);
+  document.getElementById('deptBars').innerHTML = depts.map(d => {
+    const w = (d.sales / max) * 100;
+    return `
+      <div class="bar-row">
+        <div class="name" title="${d.name}">${d.name}</div>
+        <div class="bar">
+          <div class="stacked" style="width:${w}%">
+            <div class="seg nat" style="width:${(d.nat * 100).toFixed(1)}%"></div>
+            <div class="seg priv" style="width:${(d.priv * 100).toFixed(1)}%"></div>
+          </div>
+        </div>
+        <div class="val tabular">$${(d.sales/1e6).toFixed(2)}M <span class="pct">${((d.sales/total)*100).toFixed(0)}%</span></div>
+      </div>
+    `;
+  }).join('') + `
+    <div style="margin-top:10px; font-size:11px; color: var(--text-3);">
+      <span class="swatch" style="background: var(--accent); display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;"></span>National
+      <span class="swatch" style="background: #6f8fc4; display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;margin-left:12px;"></span>Private
+    </div>
+  `;
+})();
+
+// Stores top 10
+(function drawStoreBars(){
+  const max = Math.max(...stores.map(s => s.sales));
+  document.getElementById('storeBars').innerHTML = stores.map(s => {
+    const w = (s.sales / max) * 100;
+    return `
+      <div class="bar-row">
+        <div class="name" title="Store ${s.id}">Store ${s.id}</div>
+        <div class="bar"><div class="fill" style="width:${w}%"></div></div>
+        <div class="val tabular">$${(s.sales/1000).toFixed(0)}K</div>
+      </div>
+    `;
+  }).join('');
+})();
+
+// Income × Age heatmap
+(function drawIA(){
+  const flat = incAge.flat();
+  const max = Math.max(...flat), min = Math.min(...flat);
+  const color = v => {
+    const t = (v - min) / (max - min);
+    const r = Math.round(31 + (255 - 31) * (1 - t));
+    const g = Math.round(59 + (255 - 59) * (1 - t));
+    const b = Math.round(115 + (255 - 115) * (1 - t));
+    return `rgb(${r},${g},${b})`;
+  };
+  const txtColor = v => ((v - min) / (max - min)) > 0.5 ? '#fff' : '#0d1321';
+  let html = `<div class="cell label"></div>`;
+  ages.forEach(a => html += `<div class="cell col-label">${a}</div>`);
+  incomes.forEach((inc, ri) => {
+    html += `<div class="cell label">${inc}</div>`;
+    ages.forEach((_, ci) => {
+      const v = incAge[ri][ci];
+      html += `<div class="cell tabular" style="background:${color(v)}; color:${txtColor(v)}" title="${inc} × ${ages[ci]}: $${v.toLocaleString()}">$${(v/1000).toFixed(1)}K</div>`;
+    });
+  });
+  document.getElementById('heatmapIA').innerHTML = html;
+})();
+
+// HH composition
+(function drawHH(){
+  const maxSales = Math.max(...hhComp.map(h => h.sales));
+  const maxPerHH = Math.max(...hhComp.map(h => h.perHH));
+  document.getElementById('hhComp').innerHTML = hhComp.map(h => {
+    const wSales = (h.sales / maxSales) * 100;
+    const wPer = (h.perHH / maxPerHH) * 100;
+    return `
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+          <span style="color: var(--text-2); font-size: 12px;">${h.name}</span>
+          <span class="tabular" style="font-size:11px; color: var(--text-3);">
+            $${(h.sales/1e6).toFixed(2)}M · $${h.perHH.toLocaleString()}/HH
+          </span>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <div class="bar" style="flex:1; height: 10px;">
+            <div class="fill" style="background: var(--accent); width: ${wSales}%; height: 100%; border-radius: 3px;"></div>
+          </div>
+          <div class="bar" style="flex:1; height: 10px;">
+            <div class="fill" style="background: #6f8fc4; width: ${wPer}%; height: 100%; border-radius: 3px;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') + `
+    <div style="margin-top:6px; font-size: 10px; color: var(--text-3);">
+      <span class="swatch" style="background: var(--accent); display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;"></span>Total Sales
+      <span class="swatch" style="background: #6f8fc4; display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;margin-left:12px;"></span>Sales per HH
+    </div>
+  `;
+})();
+
+// Histogram helper
+function drawHist(elId, data, format = 'pct') {
+  const max = Math.max(...data.map(d => d.pct ?? d.value));
+  document.getElementById(elId).innerHTML = data.map(d => {
+    const v = d.pct ?? d.value;
+    const h = (v / max) * 100;
+    const labelKey = d.range ?? d.d;
+    return `
+      <div class="col" title="${labelKey}: ${v}%">
+        <div class="hist-pct">${v}%</div>
+        <div class="b" style="height:${h}%;"></div>
+        <div class="lab">${labelKey}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// LTV deciles
+drawHist('ltvHist', ltvDeciles);
+
+// Basket size
+drawHist('basketSizeHist', basketSize);
+
+// Items per basket
+drawHist('itemsHist', itemsBasket);
+
+// Commodity bars
+(function drawComm(){
+  const max = Math.max(...commodities.map(c => c.sales));
+  document.getElementById('commBars').innerHTML = commodities.map(c => {
+    const w = (c.sales / max) * 100;
+    return `
+      <div class="bar-row">
+        <div class="name" title="${c.name}">${c.name}</div>
+        <div class="bar"><div class="fill" style="width:${w}%"></div></div>
+        <div class="val tabular">$${(c.sales/1000).toFixed(0)}K</div>
+      </div>
+    `;
+  }).join('');
+})();
+
+// Hour heatmap
+(function drawHr(){
+  const flat = hourDay.flat();
+  const max = Math.max(...flat), min = Math.min(...flat);
+  const color = v => {
+    const t = (v - min) / (max - min);
+    const r = Math.round(31 + (255 - 31) * (1 - t));
+    const g = Math.round(59 + (255 - 59) * (1 - t));
+    const b = Math.round(115 + (255 - 115) * (1 - t));
+    return `rgb(${r},${g},${b})`;
+  };
+  const txtColor = v => ((v - min) / (max - min)) > 0.5 ? '#fff' : '#0d1321';
+  let html = `<div class="cell label"></div>`;
+  for (let h = 0; h < 24; h++) html += `<div class="cell col-label">${h.toString().padStart(2,'0')}</div>`;
+  days.forEach((d, di) => {
+    html += `<div class="cell label">${d}</div>`;
+    for (let h = 0; h < 24; h++) {
+      const v = hourDay[di][h];
+      html += `<div class="cell" style="background:${color(v)}; color:${txtColor(v)}" title="${d} ${h}:00 · $${Math.round(v).toLocaleString()}"></div>`;
+    }
+  });
+  document.getElementById('heatmapHr').innerHTML = html;
+})();
+
+</script>
+</body>
+</html>
