@@ -150,6 +150,20 @@
   .heatmap .cell.label { background: transparent; color: var(--text-2); font-weight: 400; text-align: right; padding-right: 6px; }
   .heatmap .cell.col-label { background: transparent; color: var(--text-2); font-weight: 400; text-align: center; }
 
+  /* Customer Base panel */
+  .cb-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 28px; align-items: center; }
+  .cb-tile { display: flex; flex-direction: column; gap: 4px; }
+  .cb-tile .cb-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); margin-bottom: 4px; }
+  .cb-tile .cb-value { font-size: 24px; font-weight: 600; color: var(--text-1); letter-spacing: -0.01em; }
+  .cb-tile .delta { align-self: flex-start; margin-top: 2px; }
+  .cb-flow .cb-flow-bar { display: flex; height: 22px; border-radius: 4px; overflow: hidden; background: var(--grid); margin-top: 6px; }
+  .cb-flow .cb-flow-bar .seg { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 500; min-width: 0; overflow: hidden; }
+  .cb-flow .cb-flow-bar .seg.returning { background: var(--accent); }
+  .cb-flow .cb-flow-bar .seg.new { background: var(--pos); }
+  .cb-flow .cb-flow-bar .seg.lapsed { background: var(--neg); }
+  .cb-flow-legend { display: flex; gap: 14px; margin-top: 8px; font-size: 11px; color: var(--text-2); flex-wrap: wrap; }
+  .cb-flow-legend .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+
   /* HH comp bar */
   .hh-bars { display: flex; flex-direction: column; gap: 8px; }
 
@@ -290,37 +304,70 @@
     <div class="zone-head">
       <span class="zone-num">3</span>
       <span class="zone-title">Customer Insights</span>
-      <span class="zone-help">demographics · segments · high-value identification</span>
+      <span class="zone-help">customer base · demographics · segments · high-value identification</span>
     </div>
-    <div class="grid-2">
+    <div class="stack">
+
+      <!-- NEW: Customer Base — Reach · Frequency · Retention -->
       <div class="panel">
         <div class="panel-head">
-          <h3>Income × Age — Sales per HH</h3>
-          <span class="help">profiled HH only · 32% coverage</span>
+          <h3>Customer Base — Reach · Frequency · Retention</h3>
+          <span class="help">north-star decomposition: Active HH × Baskets/HH × AOV</span>
         </div>
-        <div class="heatmap income-age" id="heatmapIA"></div>
-      </div>
-
-      <div class="stack">
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Household Composition</h3>
-            <span class="help">Sales · Sales/HH</span>
+        <div class="cb-grid">
+          <div class="cb-tile">
+            <div class="cb-label">Active HH</div>
+            <div class="cb-value tabular">2,479</div>
+            <span class="delta neg">▼ 0.72%<span class="vs">vs prev (2,497)</span></span>
           </div>
-          <div class="hh-bars" id="hhComp"></div>
+          <div class="cb-tile">
+            <div class="cb-label">Baskets per HH</div>
+            <div class="cb-value tabular">61.1</div>
+            <span class="delta pos">▲ 21.9%<span class="vs">vs prev (50.1)</span></span>
+          </div>
+          <div class="cb-tile cb-flow">
+            <div class="cb-label">Customer Flow</div>
+            <div class="cb-flow-bar" id="hhFlowBar"></div>
+            <div class="cb-flow-legend" id="hhFlowLegend"></div>
+          </div>
         </div>
-
-        <div class="panel">
-          <div class="panel-head">
-            <h3>High-Value Customers — Sales by HH Decile</h3>
-            <span class="help">all HH ranked by spend</span>
-          </div>
-          <div class="hist" id="ltvHist"></div>
-          <div class="callout">
-            Pareto: <strong>top 10% of HH = 28% of sales</strong> · top 25% = 52% · top 50% = 78%. Bottom half contributes 22%.
-          </div>
+        <div class="callout" style="margin-top: 14px;">
+          Reach is flat (-0.72% Active HH) but visit frequency surged (+21.9% Baskets/HH) and AOV rose (+5.95%). <strong>Growth came from depth and frequency, not breadth.</strong> Customer Flow values are illustrative — computed exactly in Tableau via period-flag membership.
         </div>
       </div>
+
+      <!-- Existing two-column row -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Income × Age — Sales per HH</h3>
+            <span class="help">profiled HH only · 32% coverage</span>
+          </div>
+          <div class="heatmap income-age" id="heatmapIA"></div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Household Composition</h3>
+              <span class="help">Sales · Sales/HH</span>
+            </div>
+            <div class="hh-bars" id="hhComp"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>High-Value Customers — Sales by HH Decile</h3>
+              <span class="help">all HH ranked by spend</span>
+            </div>
+            <div class="hist" id="ltvHist"></div>
+            <div class="callout">
+              Pareto: <strong>top 10% of HH = 28% of sales</strong> · top 25% = 52% · top 50% = 78%. Bottom half contributes 22%.
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -461,6 +508,15 @@ const incAge = [
   [ 4400,  5300,  5800,  5200,  4500,  3900],
   [ 3900,  4700,  5100,  4700,  4100,  3600],
   [ 3500,  4200,  4600,  4200,  3700,  3200]
+];
+
+// HH customer flow — illustrative (will be exact in Tableau)
+// Anchored on EDA: 2,479 active HH current, 2,497 prev, mean 49.6/102 weeks active
+// → most HH are long-term shoppers; New / Lapsed expected to be small single digits %.
+const hhFlow = [
+  { kind: 'returning', label: 'Returning', count: 2417, pct: 97.5 },
+  { kind: 'new',       label: 'New',       count:   62, pct:  2.5 },
+  { kind: 'lapsed',    label: 'Lapsed',    count:   80, pct:  3.2 }  // % of prev base; lives outside the bar but in legend
 ];
 
 // HH composition (EDA exact)
@@ -609,6 +665,25 @@ document.querySelectorAll('svg.spark').forEach((sv, i) => {
       </div>
     `;
   }).join('');
+})();
+
+// HH Flow stacked bar (Customer Base panel)
+(function drawHHFlow(){
+  // Bar shows current-period composition (Returning + New = 100% of Active HH).
+  // Lapsed is shown in the legend only since it sits outside the current base.
+  const inBar = hhFlow.filter(h => h.kind !== 'lapsed');
+  const total = inBar.reduce((a, h) => a + h.count, 0);
+  document.getElementById('hhFlowBar').innerHTML = inBar.map(h => {
+    const w = (h.count / total) * 100;
+    return `<div class="seg ${h.kind}" style="width:${w.toFixed(1)}%" title="${h.label}: ${h.count.toLocaleString()} HH (${h.pct}%)">${w > 12 ? h.label + ' ' + h.pct + '%' : ''}</div>`;
+  }).join('');
+
+  document.getElementById('hhFlowLegend').innerHTML = hhFlow.map(h => `
+    <span title="${h.label} HH: ${h.count.toLocaleString()}">
+      <span class="swatch" style="background: var(--${h.kind === 'returning' ? 'accent' : h.kind === 'new' ? 'pos' : 'neg'})"></span>
+      ${h.label} <strong class="tabular" style="color: var(--text-1)">${h.count.toLocaleString()}</strong>
+    </span>
+  `).join('');
 })();
 
 // Income × Age heatmap
