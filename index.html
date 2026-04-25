@@ -76,8 +76,25 @@
   .zone-title { font-size: 14px; font-weight: 600; color: var(--text-1); }
   .zone-help { font-size: 11px; color: var(--text-3); margin-left: auto; }
 
-  /* KPI row */
-  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
+  /* KPI rows — 2 layers */
+  .kpi-row-primary   { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-bottom: var(--gap); }
+  .kpi-row-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+  .kpi-primary   { padding: 22px 24px; }
+  .kpi-primary   .value { font-size: 34px; }
+  .kpi-secondary { padding: 14px 16px; }
+  .kpi-secondary .value { font-size: 22px; }
+  .kpi-secondary .label { font-size: 10px; }
+  .kpi-primary .callout-line {
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 11px; color: var(--text-2);
+  }
+  .kpi-primary .callout-line strong { color: var(--text-1); font-weight: 600; }
+  .kpi-primary .callout-line .delta-inline { font-weight: 500; }
+  .kpi-primary .callout-line .delta-inline.pos { color: var(--pos); }
+  .kpi-primary .callout-line .delta-inline.neg { color: var(--neg); }
+  .kpi-secondary .help-mini { display: block; margin-top: 4px; font-size: 10px; color: var(--text-3); }
   .kpi {
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 18px 20px;
@@ -213,36 +230,52 @@
       <span class="zone-title">Executive Summary</span>
       <span class="zone-help">at-a-glance · current vs previous period</span>
     </div>
-    <div class="kpi-row">
-      <div class="kpi">
+    <!-- Layer 1: primary KPIs (big tiles + sparkline + decomposition callout) -->
+    <div class="kpi-row-primary">
+      <div class="kpi kpi-primary">
         <div class="label">Total Sales</div>
         <div class="value tabular">$4.53M</div>
         <span class="delta pos">▲ 28.4%<span class="vs">vs prev</span></span>
         <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+        <div class="callout-line tabular">
+          <span>Baskets <strong>151,467</strong></span>
+          <span class="delta-inline pos">▲ 21.2%</span>
+        </div>
       </div>
-      <div class="kpi star">
+      <div class="kpi kpi-primary star">
         <div class="label">Sales / Active HH / Week</div>
         <div class="value tabular">$35.82</div>
         <span class="delta pos">▲ 29.3%<span class="vs">vs prev</span></span>
         <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+        <div class="callout-line tabular">
+          <span>Sales / HH (period) <strong>$1,827</strong></span>
+          <span class="delta-inline pos">▲ 29.3%</span>
+        </div>
       </div>
-      <div class="kpi">
+    </div>
+
+    <!-- Layer 2: decomposition + supporting KPIs (smaller tiles) -->
+    <div class="kpi-row-secondary">
+      <div class="kpi kpi-secondary">
         <div class="label">Active HH</div>
         <div class="value tabular">2,479</div>
         <span class="delta neg">▼ 0.72%<span class="vs">vs prev</span></span>
-        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
       </div>
-      <div class="kpi">
+      <div class="kpi kpi-secondary">
         <div class="label">Baskets per HH</div>
         <div class="value tabular">61.1</div>
         <span class="delta pos">▲ 21.9%<span class="vs">vs prev</span></span>
-        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
       </div>
-      <div class="kpi">
+      <div class="kpi kpi-secondary">
         <div class="label">Avg Basket Value</div>
         <div class="value tabular">$29.90</div>
         <span class="delta pos">▲ 5.95%<span class="vs">vs prev</span></span>
-        <svg class="spark" viewBox="0 0 200 32" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi kpi-secondary" title="Quantity is mixed unit-of-measure (count + grams); use for in-category ranking only.">
+        <div class="label">Total Quantity</div>
+        <div class="value tabular">151.5M</div>
+        <span class="delta pos">▲ 38.7%<span class="vs">vs prev</span></span>
+        <span class="help-mini">mixed UoM · in-category only</span>
       </div>
     </div>
   </section>
